@@ -1,6 +1,7 @@
 package main
 
 import (
+    "bufio"
     "fmt"
     "net"
 )
@@ -14,19 +15,12 @@ func main() {
     defer conn.Close()
     fmt.Println("Connected to server.")
 
-    message := "Hello, server!"
-    _, err = conn.Write([]byte(message))
-    if err != nil {
-        fmt.Println("Error sending message to server:", err)
-        return
-    }
-    fmt.Println("Message sent to server.")
-
-    response := make([]byte, 4096)
-    n, err := conn.Read(response)
+    response, err := bufio.NewReader(conn).ReadString('\n')
     if err != nil {
         fmt.Println("Error reading server response:", err)
         return
     }
-    fmt.Println("Response from server:", string(response[:n]))
+    fmt.Println("Open ports:")
+    fmt.Print(response)
 }
+

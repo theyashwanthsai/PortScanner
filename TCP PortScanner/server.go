@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
     "net"
+    "time"
 )
 
 func main() {
@@ -27,4 +28,32 @@ func main() {
 func handleConnection(conn net.Conn) {
     defer conn.Close()
     fmt.Println("New client connected:", conn.RemoteAddr().String())
+
+    openPorts := scanPorts()
+    _, err := conn.Write([]byte(openPorts))
+    if err != nil {
+        fmt.Println("Error sending open ports to client:", err)
+        return
+    }
+    fmt.Println("Open ports sent to client.")
 }
+
+func scanPorts() string {
+    host := "example.com"
+    startPort := 1
+    endPort := 200
+
+    var openPorts string
+
+    for port := startPort; port <= endPort; port++ {
+        address := fmt.Sprintf("%s:%d", host, port)
+        conn, err := net.DialTimeout("tcp", address, 100*time.Millisecond)
+        if err == nil {
+            conn.Close()
+            openPorts += fmt.Sprintf("%d\n", port)
+        }
+    }
+
+    return openPorts
+}
+
